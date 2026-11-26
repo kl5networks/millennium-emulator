@@ -1,0 +1,18 @@
+name: test
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Pinned Z180 core (never vendored)
+        run: |
+          git clone https://github.com/mtdev79/z180emu "$RUNNER_TEMP/z180emu"
+          git -C "$RUNNER_TEMP/z180emu" checkout 32592c760b169bbd71f6a3b41f2e2fb08769b145
+      - name: Tests that need no firmware, and the worker build
+        env:
+          MILLENNIUM_Z180_SOURCE: ${{ runner.temp }}/z180emu
+        run: python3 -m unittest discover -p 'test_*.py' -v
